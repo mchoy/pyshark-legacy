@@ -4,11 +4,11 @@ import threading
 
 import logbook
 import sys
+import concurrent.futures
 
 import trollius as asyncio
 from logbook import StreamHandler
 from trollius import From, subprocess, Return
-from trollius.executor import TimeoutError
 from trollius.py33_exceptions import ProcessLookupError
 
 from pyshark.tshark.tshark import get_process_path, get_tshark_display_filter_flag, \
@@ -134,7 +134,7 @@ class Capture(object):
         try:
             self.apply_on_packets(keep_packet, timeout=timeout)
             self.loaded = True
-        except TimeoutError:
+        except concurrent.futures.TimeoutError:
             pass
 
     def set_debug(self, set_to=True):
@@ -406,7 +406,7 @@ class Capture(object):
             try:
                 process.kill()
                 yield asyncio.wait_for(process.wait(), 1)
-            except TimeoutError:
+            except concurrent.futures.TimeoutError:
                 self._log.debug('Waiting for process to close failed, may have zombie process.')
             except ProcessLookupError:
                 pass
